@@ -3,13 +3,11 @@
 // Register tsx to allow running TypeScript directly
 await import("tsx");
 
-import Table from "cli-table3";
 import type { AzureClientId, AzureClientSecret, AzureTenantId } from "microsoft-graph/AzureApplicationCredentials";
 import { createClientSecretContext } from "microsoft-graph/context";
 import { getEnvironmentVariable } from "microsoft-graph/environmentVariable";
 import iterateDrives from "microsoft-graph/iterateDrives";
 import iterateSiteSearch from "microsoft-graph/iterateSiteSearch";
-import { iterateToArray } from "microsoft-graph/iteration";
 import type { SiteId } from "microsoft-graph/Site";
 import { createSiteRef } from "microsoft-graph/site";
 import process from "node:process";
@@ -52,15 +50,23 @@ yargs(hideBin(process.argv))
 		async ({ tenantId, clientId, clientSecret }: ListSitesArgs) => {
 			const contextRef = createClientSecretContext(tenantId, clientId, clientSecret);
 
-			const sites = await iterateToArray(iterateSiteSearch(contextRef, "*"));
-			if (sites.length === 0) {
-				process.stdout.write("No sites found.\n");
-				return;
+			const iterator = iterateSiteSearch(contextRef, "*");
+			const head = ["id", "name"];
+			let colWidths: number[] = [];
+			let found = false;
+			for await (const site of iterator) {
+				const row = [site.id ?? "", site.name ?? ""];
+				if (!found) {
+					colWidths = head.map((h, i) => Math.max(String(h).length, String(row[i]).length, 10));
+					process.stdout.write(`${head.map((h, i) => h.padEnd(colWidths[i] ?? 10)).join(" | ")}\n`);
+					process.stdout.write(`${"-".repeat(colWidths.reduce((a, b) => a + b + 3, -3))}\n`);
+					found = true;
+				}
+				process.stdout.write(`${row.map((v, i) => String(v).padEnd(colWidths[i] ?? 10)).join(" | ")}\n`);
 			}
-
-			const table = new Table({ head: ["id", "name"] });
-			sites.map((site) => table.push([site.id ?? "", site.name ?? ""]));
-			process.stdout.write(`${table.toString()}\n`);
+			if (!found) {
+				process.stdout.write("No sites found.\n");
+			}
 		},
 	)
 	.command<ListDrivesArgs>(
@@ -74,15 +80,23 @@ yargs(hideBin(process.argv))
 		async ({ tenantId, clientId, clientSecret, siteId }: ListDrivesArgs) => {
 			const contextRef = createClientSecretContext(tenantId, clientId, clientSecret);
 			const siteRef = createSiteRef(contextRef, siteId);
-			const drives = await iterateToArray(iterateDrives(siteRef));
-			if (drives.length === 0) {
-				process.stdout.write("No drives found.\n");
-				return;
+			const iterator = iterateDrives(siteRef);
+			const head = ["id", "name"];
+			let colWidths: number[] = [];
+			let found = false;
+			for await (const drive of iterator) {
+				const row = [drive.id ?? "", drive.name ?? ""];
+				if (!found) {
+					colWidths = head.map((h, i) => Math.max(String(h).length, String(row[i]).length, 10));
+					process.stdout.write(`${head.map((h, i) => h.padEnd(colWidths[i] ?? 10)).join(" | ")}\n`);
+					process.stdout.write(`${"-".repeat(colWidths.reduce((a, b) => a + b + 3, -3))}\n`);
+					found = true;
+				}
+				process.stdout.write(`${row.map((v, i) => String(v).padEnd(colWidths[i] ?? 10)).join(" | ")}\n`);
 			}
-
-			const table = new Table({ head: ["id", "name"] });
-			drives.map((drive) => table.push([drive.id ?? "", drive.name ?? ""]));
-			process.stdout.write(`${table.toString()}\n`);
+			if (!found) {
+				process.stdout.write("No drives found.\n");
+			}
 		},
 	)
 	.demandCommand(1, "You need at least one command before moving on.")

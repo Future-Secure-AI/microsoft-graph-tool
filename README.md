@@ -16,10 +16,10 @@ This will make the `microsoft-graph` command available globally.
 ### List all sites
 
 ```
-microsoft-graph list-sites [--tenantId <tenantId>] [--clientId <clientId>] [--clientSecret <clientSecret>]
+microsoft-graph list-sites [search] [--tenantId <tenantId>] [--clientId <clientId>] [--clientSecret <clientSecret>]
 ```
 
-Lists all Microsoft 365 sites in your tenant. If credentials are not provided as options, the tool will use the corresponding environment variables.
+Lists all sites in your tenant, with an optional `search` string. If credentials are not provided as options, the tool will use the corresponding environment variables.
 
 
 ### List all drives in a site

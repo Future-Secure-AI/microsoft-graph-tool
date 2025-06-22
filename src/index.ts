@@ -19,7 +19,9 @@ type BaseArgs = {
 	clientId: AzureClientId;
 	clientSecret: AzureClientSecret;
 };
-type ListSitesArgs = BaseArgs & {};
+type ListSitesArgs = BaseArgs & {
+	search: string;
+};
 
 type ListDrivesArgs = BaseArgs & {
 	siteId: SiteId;
@@ -44,13 +46,19 @@ yargs(hideBin(process.argv))
 		},
 	})
 	.command<ListSitesArgs>(
-		"list-sites",
+		"list-sites [search]",
 		"List all sites.",
-		(yargs) => yargs,
-		async ({ tenantId, clientId, clientSecret }: ListSitesArgs) => {
+		(yargs) =>
+			yargs.positional("search", {
+				describe: "Search term for sites",
+				type: "string",
+				default: "*",
+			}),
+
+		async ({ tenantId, clientId, clientSecret, search }: ListSitesArgs) => {
 			const contextRef = createClientSecretContext(tenantId, clientId, clientSecret);
 
-			const iterator = iterateSiteSearch(contextRef, "*");
+			const iterator = iterateSiteSearch(contextRef, search);
 			const head = ["id", "name"];
 			let colWidths: number[] = [];
 			let found = false;

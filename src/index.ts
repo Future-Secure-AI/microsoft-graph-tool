@@ -8,50 +8,51 @@ import type { AzureClientId, AzureClientSecret, AzureTenantId } from "microsoft-
 import { createClientSecretContext } from "microsoft-graph/context";
 import { getEnvironmentVariable } from "microsoft-graph/environmentVariable";
 import iterateDrives from "microsoft-graph/iterateDrives";
-import iterateSites from "microsoft-graph/iterateSites";
+import iterateSiteSearch from "microsoft-graph/iterateSiteSearch";
 import { iterateToArray } from "microsoft-graph/iteration";
 import type { SiteId } from "microsoft-graph/Site";
 import { createSiteRef } from "microsoft-graph/site";
+import process from "process";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 
 type BaseArgs = {
-	tenantId?: string;
-	clientId?: string;
-	clientSecret?: string;
+	tenantId: AzureTenantId;
+	clientId: AzureClientId;
+	clientSecret: AzureClientSecret;
 };
 type ListSitesArgs = BaseArgs & {};
 
 type ListDrivesArgs = BaseArgs & {
-	siteId: string;
+	siteId: SiteId;
 };
 
 yargs(hideBin(process.argv))
+	.options({
+		tenantId: {
+			type: "string",
+			describe: "Azure Tenant ID (defaults to AZURE_TENANT_ID env)",
+			default: getEnvironmentVariable("AZURE_TENANT_ID"),
+		},
+		clientId: {
+			type: "string",
+			describe: "Azure Client ID (defaults to AZURE_CLIENT_ID env)",
+			default: getEnvironmentVariable("AZURE_CLIENT_ID"),
+		},
+		clientSecret: {
+			type: "string",
+			describe: "Azure Client Secret (defaults to AZURE_CLIENT_SECRET env)",
+			default: getEnvironmentVariable("AZURE_CLIENT_SECRET"),
+		},
+	})
 	.command<ListSitesArgs>(
 		"list-sites",
-		"List all sites in your company geography",
-		(yargs) =>
-			yargs
-				.option("tenantId", {
-					type: "string",
-					describe: "Azure Tenant ID (defaults to AZURE_TENANT_ID env)",
-				})
-				.option("clientId", {
-					type: "string",
-					describe: "Azure Client ID (defaults to AZURE_CLIENT_ID env)",
-				})
-				.option("clientSecret", {
-					type: "string",
-					describe: "Azure Client Secret (defaults to AZURE_CLIENT_SECRET env)",
-				}),
-		async (argv: ListSitesArgs) => {
-			const tenantId = (argv.tenantId || getEnvironmentVariable("AZURE_TENANT_ID")) as AzureTenantId;
-			const clientId = (argv.clientId || getEnvironmentVariable("AZURE_CLIENT_ID")) as AzureClientId;
-			const clientSecret = (argv.clientSecret || getEnvironmentVariable("AZURE_CLIENT_SECRET")) as AzureClientSecret;
-
+		"List all sites.",
+		(yargs) => yargs,
+		async ({ tenantId, clientId, clientSecret }: ListSitesArgs) => {
 			const contextRef = createClientSecretContext(tenantId, clientId, clientSecret);
 
-			const sites = await iterateToArray(iterateSites(contextRef));
+			const sites = await iterateToArray(iterateSiteSearch(contextRef, "*"));
 			if (sites.length === 0) {
 				process.stdout.write("No sites found.\n");
 				return;
@@ -64,25 +65,14 @@ yargs(hideBin(process.argv))
 	)
 	.command<ListDrivesArgs>(
 		"list-drives <siteId>",
-		"List all drives in a site",
+		"List all drives in a site.",
 		(yargs) =>
 			yargs.positional("siteId", {
 				describe: "Site ID to list drives for",
 				type: "string",
 			}),
-		async (argv: ListDrivesArgs) => {
-			const tenantId = (argv.tenantId || getEnvironmentVariable("AZURE_TENANT_ID")) as AzureTenantId;
-			const clientId = (argv.clientId || getEnvironmentVariable("AZURE_CLIENT_ID")) as AzureClientId;
-			const clientSecret = (argv.clientSecret || getEnvironmentVariable("AZURE_CLIENT_SECRET")) as AzureClientSecret;
-			const siteId = argv.siteId as SiteId;
-
-			if (!siteId) {
-				process.stderr.write("siteId is required.\n");
-				process.exit(1);
-			}
-
+		async ({ tenantId, clientId, clientSecret, siteId }: ListDrivesArgs) => {
 			const contextRef = createClientSecretContext(tenantId, clientId, clientSecret);
-
 			const siteRef = createSiteRef(contextRef, siteId);
 			const drives = await iterateToArray(iterateDrives(siteRef));
 			if (drives.length === 0) {

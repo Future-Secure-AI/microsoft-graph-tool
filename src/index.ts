@@ -7,16 +7,27 @@ import Table from "cli-table3";
 import type { AzureClientId, AzureClientSecret, AzureTenantId } from "microsoft-graph/AzureApplicationCredentials";
 import { createClientSecretContext } from "microsoft-graph/context";
 import { getEnvironmentVariable } from "microsoft-graph/environmentVariable";
+import iterateDrives from "microsoft-graph/iterateDrives";
 import iterateSites from "microsoft-graph/iterateSites";
 import { iterateToArray } from "microsoft-graph/iteration";
 import type { SiteId } from "microsoft-graph/Site";
 import { createSiteRef } from "microsoft-graph/site";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
-import iterateDrives from "microsoft-graph/iterateDrives";
+
+type BaseArgs = {
+	tenantId?: string;
+	clientId?: string;
+	clientSecret?: string;
+};
+type ListSitesArgs = BaseArgs & {};
+
+type ListDrivesArgs = BaseArgs & {
+	siteId: string;
+};
 
 yargs(hideBin(process.argv))
-	.command(
+	.command<ListSitesArgs>(
 		"list-sites",
 		"List all sites in your company geography",
 		(yargs) =>
@@ -33,7 +44,7 @@ yargs(hideBin(process.argv))
 					type: "string",
 					describe: "Azure Client Secret (defaults to AZURE_CLIENT_SECRET env)",
 				}),
-		async (argv: any) => {
+		async (argv: ListSitesArgs) => {
 			const tenantId = (argv.tenantId || getEnvironmentVariable("AZURE_TENANT_ID")) as AzureTenantId;
 			const clientId = (argv.clientId || getEnvironmentVariable("AZURE_CLIENT_ID")) as AzureClientId;
 			const clientSecret = (argv.clientSecret || getEnvironmentVariable("AZURE_CLIENT_SECRET")) as AzureClientSecret;
@@ -51,7 +62,7 @@ yargs(hideBin(process.argv))
 			process.stdout.write(`${table.toString()}\n`);
 		},
 	)
-	.command(
+	.command<ListDrivesArgs>(
 		"list-drives <siteId>",
 		"List all drives in a site",
 		(yargs) =>
@@ -59,7 +70,7 @@ yargs(hideBin(process.argv))
 				describe: "Site ID to list drives for",
 				type: "string",
 			}),
-		async (argv: { siteId: string; tenantId?: string; clientId?: string; clientSecret?: string }) => {
+		async (argv: ListDrivesArgs) => {
 			const tenantId = (argv.tenantId || getEnvironmentVariable("AZURE_TENANT_ID")) as AzureTenantId;
 			const clientId = (argv.clientId || getEnvironmentVariable("AZURE_CLIENT_ID")) as AzureClientId;
 			const clientSecret = (argv.clientSecret || getEnvironmentVariable("AZURE_CLIENT_SECRET")) as AzureClientSecret;

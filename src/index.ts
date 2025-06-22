@@ -3,6 +3,7 @@
 // Register tsx to allow running TypeScript directly
 await import("tsx");
 
+import Table from "cli-table3";
 import type { AzureClientId, AzureClientSecret, AzureTenantId } from "microsoft-graph/AzureApplicationCredentials";
 import { createClientSecretContext } from "microsoft-graph/context";
 import { getEnvironmentVariable } from "microsoft-graph/environmentVariable";
@@ -42,12 +43,10 @@ yargs(hideBin(process.argv))
 				return;
 			}
 
-			console.table(
-				sites.map((site) => ({
-					id: site.id,
-					name: site.name,
-				})),
-			);
+			// Use cli-table3 for table output without (index) and without quotes
+			const table = new Table({ head: ["id", "name"] });
+			sites.map((site) => table.push([site.id ?? "", site.name ?? ""]));
+			process.stdout.write(`${table.toString()}\n`);
 		},
 	)
 	.demandCommand(1, "You need at least one command before moving on.")

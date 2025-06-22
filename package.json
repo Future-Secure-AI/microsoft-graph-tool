@@ -2,7 +2,12 @@
 	"name": "microsoft-graph-tool",
 	"version": "0.1.0",
 	"description": "Basic CLI tool for interacting with Microsoft Graph API",
-	"keywords": ["Microsoft", "GraphAPI", "SDK", "NodeJS"],
+	"keywords": [
+		"Microsoft",
+		"GraphAPI",
+		"SDK",
+		"NodeJS"
+	],
 	"main": "dist/index.js",
 	"bin": {
 		"microsoft-graph": "./dist/index.js"
@@ -28,6 +33,7 @@
 		"vitest": "^3.1.4"
 	},
 	"dependencies": {
-		"lodash": "^4.17.21"
+		"lodash": "^4.17.21",
+		"microsoft-graph": "^3.1.1"
 	}
 }

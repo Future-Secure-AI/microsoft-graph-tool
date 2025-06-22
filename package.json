@@ -2,18 +2,14 @@
 	"name": "microsoft-graph-tool",
 	"version": "0.1.0",
 	"description": "Basic CLI tool for interacting with Microsoft Graph API",
-	"keywords": [
-		"Microsoft",
-		"GraphAPI",
-		"SDK",
-		"NodeJS"
-	],
+	"keywords": ["Microsoft", "GraphAPI", "SDK", "NodeJS"],
 	"main": "dist/index.js",
 	"bin": {
 		"microsoft-graph": "./src/index.ts"
 	},
 	"scripts": {
-		"build": "tsc"
+		"check": "biome check",
+		"release": "npm publish --access public"
 	},
 	"repository": {
 		"type": "git",

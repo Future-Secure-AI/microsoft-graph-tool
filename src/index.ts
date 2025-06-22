@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env NODE_NO_WARNINGS=1 node
 
 // Register tsx to allow running TypeScript directly
 await import("tsx");
@@ -12,7 +12,7 @@ import iterateSiteSearch from "microsoft-graph/iterateSiteSearch";
 import { iterateToArray } from "microsoft-graph/iteration";
 import type { SiteId } from "microsoft-graph/Site";
 import { createSiteRef } from "microsoft-graph/site";
-import process from "process";
+import process from "node:process";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 

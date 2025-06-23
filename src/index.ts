@@ -1,15 +1,16 @@
 #!/usr/bin/env node
 
+import type { Site } from "@microsoft/microsoft-graph-types";
 import { cac } from "cac";
 import chalk from "chalk";
 import type { AzureClientId, AzureClientSecret, AzureTenantId } from "microsoft-graph/AzureApplicationCredentials";
 import { createClientSecretContext } from "microsoft-graph/context";
 import { getEnvironmentVariable } from "microsoft-graph/environmentVariable";
-import getDriveFromUrl from "microsoft-graph/getDriveFromUrl";
+import getSiteByName from "microsoft-graph/getSiteByName";
 import iterateDrives from "microsoft-graph/iterateDrives";
 import iterateSiteSearch from "microsoft-graph/iterateSiteSearch";
 import { parseSharepointUrl } from "microsoft-graph/sharepointUrl";
-import type { SiteId } from "microsoft-graph/Site";
+import type { SiteId, SiteRef } from "microsoft-graph/Site";
 import { createSiteRef } from "microsoft-graph/site";
 import process from "node:process";
 
@@ -75,12 +76,11 @@ cli.command("list-drives <siteId>", "List all drives in a site.").action(async (
 	}
 });
 
-cli.command("resolve-url <url>", "Resolve a SharePoint URL to siteId and driveId.").action(async (url: string, { tenantId, clientId, clientSecret }: BaseArgs) => {
-	const { hostName, siteName, driveName } = parseSharepointUrl(url);
+cli.command("get-site <url>", "Resolve a SharePoint URL to siteId.").action(async (url: string, { tenantId, clientId, clientSecret }: BaseArgs) => {
+	const { hostName, siteName } = parseSharepointUrl(url);
 
-	process.stdout.write(`${chalk.cyan("Hostname: ")}${chalk.white(hostName)}\n`);
+	process.stdout.write(`${chalk.cyan("Host Name: ")}${chalk.white(hostName)}\n`);
 	process.stdout.write(`${chalk.cyan("Site Name: ")}${chalk.white(siteName)}\n`);
-	process.stdout.write(`${chalk.cyan("Drive Name: ")}${chalk.white(driveName)}\n`);
 
 	if (!hostName) {
 		process.stdout.write(chalk.red("Invalid SharePoint URL: Host name is missing."));
@@ -90,21 +90,18 @@ cli.command("resolve-url <url>", "Resolve a SharePoint URL to siteId and driveId
 		process.stdout.write(chalk.red("Invalid SharePoint URL: Site name is missing."));
 		return;
 	}
-	if (!driveName) {
-		process.stdout.write(chalk.red("Invalid SharePoint URL: Drive name is missing."));
-		return;
-	}
 
 	const contextRef = createClientSecretContext(tenantId, clientId, clientSecret);
 
+	let site: (Site & SiteRef) | null = null;
 	try {
-		const drive = await getDriveFromUrl(contextRef, url);
-		process.stdout.write(`${chalk.cyan("Site ID: ")}${chalk.white(drive.siteId)}\n`);
-		process.stdout.write(`${chalk.cyan("Drive ID: ")}${chalk.white(drive.id)}\n`);
+		site = await getSiteByName(contextRef, hostName, siteName);
 	} catch (err) {
-		process.stderr.write(chalk.red(`Error resolving URL: ${err instanceof Error ? err.message : String(err)}\n`));
+		process.stderr.write(chalk.red(`Error resolving site: ${err instanceof Error ? err.message : String(err)}\n`));
 		process.exit(1);
 	}
+
+	process.stdout.write(`${chalk.cyan("Site ID: ")}${chalk.white(site.siteId)}\n`);
 });
 
 cli.help();

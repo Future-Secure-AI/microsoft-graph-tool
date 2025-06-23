@@ -13,6 +13,14 @@ This will make the `microsoft-graph` command available globally.
 
 ## Usage
 
+### Get SiteID from a Sharepoint URL
+
+```sh
+graph get-site <url> [--tenantId <tenantId>] [--clientId <clientId>] [--clientSecret <clientSecret>]
+```
+
+Resolves a SharePoint URL to its corresponding site ID and drive ID. Provide the full SharePoint URL as the positional argument. Credentials can be provided as options or via environment variables.
+
 ### List all sites
 
 ```sh
@@ -20,7 +28,6 @@ graph list-sites [search] [--tenantId <tenantId>] [--clientId <clientId>] [--cli
 ```
 
 Lists all sites in your tenant, with an optional `search` string. If credentials are not provided as options, the tool will use the corresponding environment variables.
-
 
 ### List all drives in a site
 
@@ -30,10 +37,4 @@ graph list-drives <siteId> [--tenantId <tenantId>] [--clientId <clientId>] [--cl
 
 Lists all drives for the specified site ID. You must provide the `siteId` as a positional argument. Credentials can be provided as options or via environment variables.
 
-### Resolve a SharePoint URL
 
-```sh
-graph resolve-url <url> [--tenantId <tenantId>] [--clientId <clientId>] [--clientSecret <clientSecret>]
-```
-
-Resolves a SharePoint URL to its corresponding site ID and drive ID. Provide the full SharePoint URL as the positional argument. Credentials can be provided as options or via environment variables.

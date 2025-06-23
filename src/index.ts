@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { cac } from "cac";
+import chalk from "chalk";
 import type { AzureClientId, AzureClientSecret, AzureTenantId } from "microsoft-graph/AzureApplicationCredentials";
 import { createClientSecretContext } from "microsoft-graph/context";
 import { getEnvironmentVariable } from "microsoft-graph/environmentVariable";
@@ -41,14 +42,14 @@ cli.command("list-sites [search]", "List all sites.").action(async (search: stri
 		const row = [site.id ?? "", site.name ?? ""];
 		if (!found) {
 			colWidths = head.map((h, i) => Math.max(String(h).length, String(row[i]).length, 10));
-			process.stdout.write(`${head.map((h, i) => h.padEnd(colWidths[i] ?? 10)).join(" | ")}\n`);
-			process.stdout.write(`${"-".repeat(colWidths.reduce((a, b) => a + b + 3, -3))}\n`);
+			process.stdout.write(`${chalk.bold.cyan(head.map((h, i) => h.padEnd(colWidths[i] ?? 10)).join(" | "))}\n`);
+			process.stdout.write(`${chalk.gray("-".repeat(colWidths.reduce((a, b) => a + b + 3, -3)))}\n`);
 			found = true;
 		}
-		process.stdout.write(`${row.map((v, i) => String(v).padEnd(colWidths[i] ?? 10)).join(" | ")}\n`);
+		process.stdout.write(`${chalk.green(row.map((v, i) => String(v).padEnd(colWidths[i] ?? 10)).join(" | "))}\n`);
 	}
 	if (!found) {
-		process.stdout.write("No sites found.\n");
+		process.stdout.write(chalk.yellow("No sites found.\n"));
 	}
 });
 
@@ -63,14 +64,14 @@ cli.command("list-drives <siteId>", "List all drives in a site.").action(async (
 		const row = [drive.id ?? "", drive.name ?? ""];
 		if (!found) {
 			colWidths = head.map((h, i) => Math.max(String(h).length, String(row[i]).length, 10));
-			process.stdout.write(`${head.map((h, i) => h.padEnd(colWidths[i] ?? 10)).join(" | ")}\n`);
-			process.stdout.write(`${"-".repeat(colWidths.reduce((a, b) => a + b + 3, -3))}\n`);
+			process.stdout.write(`${chalk.bold.cyan(head.map((h, i) => h.padEnd(colWidths[i] ?? 10)).join(" | "))}\n`);
+			process.stdout.write(`${chalk.gray("-".repeat(colWidths.reduce((a, b) => a + b + 3, -3)))}\n`);
 			found = true;
 		}
-		process.stdout.write(`${row.map((v, i) => String(v).padEnd(colWidths[i] ?? 10)).join(" | ")}\n`);
+		process.stdout.write(`${chalk.green(row.map((v, i) => String(v).padEnd(colWidths[i] ?? 10)).join(" | "))}\n`);
 	}
 	if (!found) {
-		process.stdout.write("No drives found.\n");
+		process.stdout.write(chalk.yellow("No drives found.\n"));
 	}
 });
 
@@ -78,26 +79,26 @@ cli.command("resolve-url <url>", "Resolve a SharePoint URL to siteId and driveId
 	const { hostName, siteName, driveName } = parseSharepointUrl(url);
 
 	if (!hostName) {
-		process.stdout.write("Invalid SharePoint URL: Host name is missing.");
+		process.stdout.write(chalk.red("Invalid SharePoint URL: Host name is missing."));
 		return;
 	}
 	if (!siteName) {
-		process.stdout.write("Invalid SharePoint URL: Site name is missing.");
+		process.stdout.write(chalk.red("Invalid SharePoint URL: Site name is missing."));
 		return;
 	}
 	if (!driveName) {
-		process.stdout.write("Invalid SharePoint URL: Drive name is missing.");
+		process.stdout.write(chalk.red("Invalid SharePoint URL: Drive name is missing."));
 		return;
 	}
 
 	const contextRef = createClientSecretContext(tenantId, clientId, clientSecret);
 
 	const drive = await getDriveFromUrl(contextRef, url);
-	process.stdout.write(`Hostname: ${hostName}\n`);
-	process.stdout.write(`Site Name: ${siteName}\n`);
-	process.stdout.write(`Drive Name: ${driveName}\n`);
-	process.stdout.write(`Site ID: ${drive.siteId}\n`);
-	process.stdout.write(`Drive ID: ${drive.id}\n`);
+	process.stdout.write(`${chalk.cyan("Hostname: ")}${chalk.white(hostName)}\n`);
+	process.stdout.write(`${chalk.cyan("Site Name: ")}${chalk.white(siteName)}\n`);
+	process.stdout.write(`${chalk.cyan("Drive Name: ")}${chalk.white(driveName)}\n`);
+	process.stdout.write(`${chalk.cyan("Site ID: ")}${chalk.white(drive.siteId)}\n`);
+	process.stdout.write(`${chalk.cyan("Drive ID: ")}${chalk.white(drive.id)}\n`);
 });
 
 cli.help();

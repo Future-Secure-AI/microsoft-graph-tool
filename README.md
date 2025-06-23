@@ -29,3 +29,11 @@ microsoft-graph list-drives <siteId> [--tenantId <tenantId>] [--clientId <client
 ```
 
 Lists all drives for the specified site ID. You must provide the `siteId` as a positional argument. Credentials can be provided as options or via environment variables.
+
+### Resolve a SharePoint URL
+
+```
+microsoft-graph resolve-url <url> [--tenantId <tenantId>] [--clientId <clientId>] [--clientSecret <clientSecret>]
+```
+
+Resolves a SharePoint URL to its corresponding site ID and drive ID. Provide the full SharePoint URL as the positional argument. Credentials can be provided as options or via environment variables.

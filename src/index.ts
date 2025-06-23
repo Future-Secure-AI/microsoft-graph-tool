@@ -78,6 +78,10 @@ cli.command("list-drives <siteId>", "List all drives in a site.").action(async (
 cli.command("resolve-url <url>", "Resolve a SharePoint URL to siteId and driveId.").action(async (url: string, { tenantId, clientId, clientSecret }: BaseArgs) => {
 	const { hostName, siteName, driveName } = parseSharepointUrl(url);
 
+	process.stdout.write(`${chalk.cyan("Hostname: ")}${chalk.white(hostName)}\n`);
+	process.stdout.write(`${chalk.cyan("Site Name: ")}${chalk.white(siteName)}\n`);
+	process.stdout.write(`${chalk.cyan("Drive Name: ")}${chalk.white(driveName)}\n`);
+
 	if (!hostName) {
 		process.stdout.write(chalk.red("Invalid SharePoint URL: Host name is missing."));
 		return;
@@ -93,12 +97,14 @@ cli.command("resolve-url <url>", "Resolve a SharePoint URL to siteId and driveId
 
 	const contextRef = createClientSecretContext(tenantId, clientId, clientSecret);
 
-	const drive = await getDriveFromUrl(contextRef, url);
-	process.stdout.write(`${chalk.cyan("Hostname: ")}${chalk.white(hostName)}\n`);
-	process.stdout.write(`${chalk.cyan("Site Name: ")}${chalk.white(siteName)}\n`);
-	process.stdout.write(`${chalk.cyan("Drive Name: ")}${chalk.white(driveName)}\n`);
-	process.stdout.write(`${chalk.cyan("Site ID: ")}${chalk.white(drive.siteId)}\n`);
-	process.stdout.write(`${chalk.cyan("Drive ID: ")}${chalk.white(drive.id)}\n`);
+	try {
+		const drive = await getDriveFromUrl(contextRef, url);
+		process.stdout.write(`${chalk.cyan("Site ID: ")}${chalk.white(drive.siteId)}\n`);
+		process.stdout.write(`${chalk.cyan("Drive ID: ")}${chalk.white(drive.id)}\n`);
+	} catch (err) {
+		process.stderr.write(chalk.red(`Error resolving URL: ${err instanceof Error ? err.message : String(err)}\n`));
+		process.exit(1);
+	}
 });
 
 cli.help();

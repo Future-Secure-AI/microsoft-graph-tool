@@ -1,16 +1,11 @@
 {
 	"name": "microsoft-graph-tool",
-	"version": "0.3.3",
+	"version": "0.3.4",
 	"description": "Basic CLI tool for interacting with Microsoft Graph API",
-	"keywords": [
-		"Microsoft",
-		"GraphAPI",
-		"SDK",
-		"NodeJS"
-	],
+	"keywords": ["Microsoft", "GraphAPI", "SDK", "NodeJS"],
 	"main": "dist/index.js",
 	"bin": {
-		"microsoft-graph": "dist/index.js"
+		"graph": "dist/index.js"
 	},
 	"scripts": {
 		"check": "biome check",
@@ -35,6 +30,6 @@
 	"dependencies": {
 		"cac": "^6.7.14",
 		"chalk": "^5.4.1",
-		"microsoft-graph": "^3.2.2"
+		"microsoft-graph": "^3.2.1"
 	}
 }

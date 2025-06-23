@@ -1,19 +1,20 @@
 {
 	"name": "microsoft-graph-tool",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"description": "Basic CLI tool for interacting with Microsoft Graph API",
 	"keywords": ["Microsoft", "GraphAPI", "SDK", "NodeJS"],
 	"main": "dist/index.js",
 	"bin": {
-		"microsoft-graph": "./src/index.ts"
+		"microsoft-graph": "dist/index.js"
 	},
 	"scripts": {
 		"check": "biome check",
-		"release": "npm publish --access public"
+		"release": "npm run build & npm publish --access public",
+		"build": "tsc && chmod +x dist/index.js"
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/Future-Secure-AI/microsoft-graph-tool"
+		"url": "git+https://github.com/Future-Secure-AI/microsoft-graph-tool.git"
 	},
 	"author": "FSAI",
 	"license": "PolyForm Noncommercial License 1.0.0",

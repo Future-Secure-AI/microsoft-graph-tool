@@ -1,7 +1,4 @@
-#!/usr/bin/env NODE_NO_WARNINGS=1 node
-
-// Register tsx to allow running TypeScript directly
-await import("tsx");
+#!/usr/bin/env node
 
 import type { AzureClientId, AzureClientSecret, AzureTenantId } from "microsoft-graph/AzureApplicationCredentials";
 import { createClientSecretContext } from "microsoft-graph/context";

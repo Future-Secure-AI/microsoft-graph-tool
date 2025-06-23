@@ -4,8 +4,10 @@ import { cac } from "cac";
 import type { AzureClientId, AzureClientSecret, AzureTenantId } from "microsoft-graph/AzureApplicationCredentials";
 import { createClientSecretContext } from "microsoft-graph/context";
 import { getEnvironmentVariable } from "microsoft-graph/environmentVariable";
+import getSiteByName from "microsoft-graph/getSiteByName";
 import iterateDrives from "microsoft-graph/iterateDrives";
 import iterateSiteSearch from "microsoft-graph/iterateSiteSearch";
+import listDrives from "microsoft-graph/listDrives";
 import type { SiteId } from "microsoft-graph/Site";
 import { createSiteRef } from "microsoft-graph/site";
 import process from "node:process";
@@ -72,6 +74,40 @@ cli.command("list-drives <siteId>", "List all drives in a site.").action(async (
 	if (!found) {
 		process.stdout.write("No drives found.\n");
 	}
+});
+
+cli.command("resolve <url>", "Resolve a SharePoint URL to siteId and driveId.").action(async (url: string, options: BaseArgs) => {
+	const { tenantId, clientId, clientSecret } = options;
+
+	const parsed = new URL(url);
+	const hostName = parsed.hostname;
+	// /sites/<siteName>/<driveName>/...
+	const pathParts = parsed.pathname.split("/").filter(Boolean);
+	if (pathParts[0] !== "sites" || pathParts.length < 3) {
+		throw new Error("URL must be of the form https://<hostName>/sites/<siteName>/<driveName>/...");
+	}
+	const siteName = pathParts[1];
+	const driveName = pathParts[2];
+
+	const contextRef = createClientSecretContext(tenantId, clientId, clientSecret);
+	const siteOp = await getSiteByName(contextRef, hostName, siteName);
+	const site = await siteOp();
+	if (!site) {
+		throw new Error("Site not found");
+	}
+	if (!site.id) {
+		throw new Error("Site id not found");
+	}
+	const drivesOp = listDrives(site, 100);
+	const drivesList = await drivesOp();
+	const drive = drivesList.drives.find((d: any) => d.name === driveName);
+	if (!drive) {
+		throw new Error("Drive not found");
+	}
+	if (!drive.id) {
+		throw new Error("Drive id not found");
+	}
+	return { siteId: site.id, driveId: drive.id };
 });
 
 cli.help();

@@ -2,7 +2,12 @@
 	"name": "microsoft-graph-tool",
 	"version": "0.2.1",
 	"description": "Basic CLI tool for interacting with Microsoft Graph API",
-	"keywords": ["Microsoft", "GraphAPI", "SDK", "NodeJS"],
+	"keywords": [
+		"Microsoft",
+		"GraphAPI",
+		"SDK",
+		"NodeJS"
+	],
 	"main": "dist/index.js",
 	"bin": {
 		"microsoft-graph": "dist/index.js"
@@ -22,18 +27,13 @@
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
 		"@microsoft/microsoft-graph-types": "^2.40.0",
-		"@types/lodash": "^4.17.17",
 		"@types/node": "^22.15.21",
-		"@types/yargs": "^17.0.33",
 		"globals": "^16.2.0",
 		"typescript": "^5.8.3",
 		"vitest": "^3.1.4"
 	},
 	"dependencies": {
-		"cli-table3": "^0.6.5",
-		"lodash": "^4.17.21",
-		"microsoft-graph": "^3.1.1",
-		"tsx": "^4.20.3",
-		"yargs": "^18.0.0"
+		"cac": "^6.7.14",
+		"microsoft-graph": "^3.1.1"
 	}
 }

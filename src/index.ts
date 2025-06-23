@@ -101,4 +101,18 @@ cli.command("resolve-url <url>", "Resolve a SharePoint URL to siteId and driveId
 });
 
 cli.help();
-cli.parse();
+
+try {
+	cli.parse();
+} catch (err) {
+	if (err && typeof err === "object" && "name" in err && err.name === "CACError") {
+		process.stderr.write(`Error: ${err instanceof Error ? err.message : String(err)}\n`);
+		cli.outputHelp();
+		process.exit(1);
+	}
+	throw err;
+}
+
+if (process.argv.length <= 2) {
+	cli.outputHelp();
+}

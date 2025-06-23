@@ -34,6 +34,6 @@
 	},
 	"dependencies": {
 		"cac": "^6.7.14",
-		"microsoft-graph": "^3.1.1"
+		"microsoft-graph": "^3.2.0"
 	}
 }

@@ -4,10 +4,10 @@ import { cac } from "cac";
 import type { AzureClientId, AzureClientSecret, AzureTenantId } from "microsoft-graph/AzureApplicationCredentials";
 import { createClientSecretContext } from "microsoft-graph/context";
 import { getEnvironmentVariable } from "microsoft-graph/environmentVariable";
-import getSiteByName from "microsoft-graph/getSiteByName";
+import getDriveFromUrl from "microsoft-graph/getDriveFromUrl";
 import iterateDrives from "microsoft-graph/iterateDrives";
 import iterateSiteSearch from "microsoft-graph/iterateSiteSearch";
-import listDrives from "microsoft-graph/listDrives";
+import { parseSharepointUrl } from "microsoft-graph/sharepointUrl";
 import type { SiteId } from "microsoft-graph/Site";
 import { createSiteRef } from "microsoft-graph/site";
 import process from "node:process";
@@ -29,9 +29,8 @@ const cli = cac("graph-tool")
 		default: getEnvironmentVariable("AZURE_CLIENT_SECRET"),
 	});
 
-cli.command("list-sites [search]", "List all sites.").action(async (search: string | undefined, options: BaseArgs) => {
+cli.command("list-sites [search]", "List all sites.").action(async (search: string | undefined, { tenantId, clientId, clientSecret }: BaseArgs) => {
 	const searchTerm = search ?? "*";
-	const { tenantId, clientId, clientSecret } = options;
 	const contextRef = createClientSecretContext(tenantId, clientId, clientSecret);
 
 	const iterator = iterateSiteSearch(contextRef, searchTerm);
@@ -53,8 +52,7 @@ cli.command("list-sites [search]", "List all sites.").action(async (search: stri
 	}
 });
 
-cli.command("list-drives <siteId>", "List all drives in a site.").action(async (siteId: SiteId, options: BaseArgs) => {
-	const { tenantId, clientId, clientSecret } = options;
+cli.command("list-drives <siteId>", "List all drives in a site.").action(async (siteId: SiteId, { tenantId, clientId, clientSecret }: BaseArgs) => {
 	const contextRef = createClientSecretContext(tenantId, clientId, clientSecret);
 	const siteRef = createSiteRef(contextRef, siteId);
 	const iterator = iterateDrives(siteRef);
@@ -76,38 +74,30 @@ cli.command("list-drives <siteId>", "List all drives in a site.").action(async (
 	}
 });
 
-cli.command("resolve <url>", "Resolve a SharePoint URL to siteId and driveId.").action(async (url: string, options: BaseArgs) => {
-	const { tenantId, clientId, clientSecret } = options;
+cli.command("resolve-url <url>", "Resolve a SharePoint URL to siteId and driveId.").action(async (url: string, { tenantId, clientId, clientSecret }: BaseArgs) => {
+	const { hostName, siteName, driveName } = parseSharepointUrl(url);
 
-	const parsed = new URL(url);
-	const hostName = parsed.hostname;
-	// /sites/<siteName>/<driveName>/...
-	const pathParts = parsed.pathname.split("/").filter(Boolean);
-	if (pathParts[0] !== "sites" || pathParts.length < 3) {
-		throw new Error("URL must be of the form https://<hostName>/sites/<siteName>/<driveName>/...");
+	if (!hostName) {
+		process.stdout.write("Invalid SharePoint URL: Host name is missing.");
+		return;
 	}
-	const siteName = pathParts[1];
-	const driveName = pathParts[2];
+	if (!siteName) {
+		process.stdout.write("Invalid SharePoint URL: Site name is missing.");
+		return;
+	}
+	if (!driveName) {
+		process.stdout.write("Invalid SharePoint URL: Drive name is missing.");
+		return;
+	}
 
 	const contextRef = createClientSecretContext(tenantId, clientId, clientSecret);
-	const siteOp = await getSiteByName(contextRef, hostName, siteName);
-	const site = await siteOp();
-	if (!site) {
-		throw new Error("Site not found");
-	}
-	if (!site.id) {
-		throw new Error("Site id not found");
-	}
-	const drivesOp = listDrives(site, 100);
-	const drivesList = await drivesOp();
-	const drive = drivesList.drives.find((d: any) => d.name === driveName);
-	if (!drive) {
-		throw new Error("Drive not found");
-	}
-	if (!drive.id) {
-		throw new Error("Drive id not found");
-	}
-	return { siteId: site.id, driveId: drive.id };
+
+	const drive = await getDriveFromUrl(contextRef, url);
+	process.stdout.write(`Hostname: ${hostName}\n`);
+	process.stdout.write(`Site Name: ${siteName}\n`);
+	process.stdout.write(`Drive Name: ${driveName}\n`);
+	process.stdout.write(`Site ID: ${drive.siteId}\n`);
+	process.stdout.write(`Drive ID: ${drive.id}\n`);
 });
 
 cli.help();

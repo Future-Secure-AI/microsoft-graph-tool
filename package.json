@@ -2,7 +2,12 @@
 	"name": "microsoft-graph-tool",
 	"version": "0.3.4",
 	"description": "Basic CLI tool for interacting with Microsoft Graph API",
-	"keywords": ["Microsoft", "GraphAPI", "SDK", "NodeJS"],
+	"keywords": [
+		"Microsoft",
+		"GraphAPI",
+		"SDK",
+		"NodeJS"
+	],
 	"main": "dist/index.js",
 	"bin": {
 		"graph": "dist/index.js"
@@ -20,7 +25,7 @@
 	"license": "PolyForm Noncommercial License 1.0.0",
 	"type": "module",
 	"devDependencies": {
-		"@biomejs/biome": "^1.9.4",
+		"@biomejs/biome": "^2.0.0",
 		"@microsoft/microsoft-graph-types": "^2.40.0",
 		"@types/node": "^22.15.21",
 		"globals": "^16.2.0",

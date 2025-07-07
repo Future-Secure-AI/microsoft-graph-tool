@@ -20,7 +20,7 @@ type BaseArgs = {
 	clientSecret: AzureClientSecret;
 };
 
-const cli = cac("graph-tool")
+const cli = cac("graph")
 	.option("--tenantId <id>", "Azure Tenant ID", {
 		default: getEnvironmentVariable("AZURE_TENANT_ID"),
 	})

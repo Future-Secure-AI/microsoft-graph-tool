@@ -9,7 +9,7 @@ You can install this tool globally from npm:
 npm install -g microsoft-graph-tool
 ```
 
-This will make the `microsoft-graph` command available globally.
+This will make the `graph` command available globally.
 
 ## Usage
 
